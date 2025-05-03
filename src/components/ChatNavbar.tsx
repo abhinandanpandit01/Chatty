@@ -15,6 +15,7 @@ function ChatNavbar({ contactInfo }: ChatNavbarProps) {
   const navigate = useNavigate();
   const handleBackToChats = () => {
     updateContact(emptyUser);
+    //TODO: call a api and store all the chats
     navigate("/chat/me/chats");
   };
   return (

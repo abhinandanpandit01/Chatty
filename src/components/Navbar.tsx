@@ -1,7 +1,6 @@
 import { Link } from "react-router-dom";
 import { Button } from "./ui/button";
 import { SignedIn, SignedOut, SignInButton } from "@clerk/clerk-react";
-
 function Navbar() {
   return (
     <div className="w-full py-4 px-7 bg-neutral-900 flex justify-between">
@@ -9,7 +8,7 @@ function Navbar() {
         Chatt<span className="text-indigo-500">Y</span>
       </h1>
       <SignedIn>
-        <Link to={"/chat/me"}>
+        <Link to={"/chat/me/chats"}>
           <Button className="bg-indigo-600 text-white">Let's Chat</Button>
         </Link>
       </SignedIn>
