@@ -5,7 +5,9 @@ import { createServer } from "node:http";
 import { Server } from "socket.io";
 import cors from "cors";
 import { socketFunctions } from "./socket/socket";
-
+import userRouter from "./routes/user.router";
+import mongoose from "mongoose";
+import { chatRouter } from "./routes/chat.router";
 const expressServer = express();
 expressServer.use(express.json());
 expressServer.use(
@@ -14,6 +16,14 @@ expressServer.use(
     credentials: true,
   })
 );
+mongoose
+  .connect(process.env.MONGODB_URL as string)
+  .then(() => {
+    console.log("> Connected to MongoDB ⚙️");
+  })
+  .catch((err) => {
+    console.log("Failed to connect to db", err);
+  });
 const httpServer = createServer(expressServer);
 export const socketServer = new Server(httpServer, {
   cors: {
@@ -23,7 +33,8 @@ export const socketServer = new Server(httpServer, {
 });
 
 socketFunctions();
-
+expressServer.use("/users", userRouter);
+expressServer.use("/chats", chatRouter);
 httpServer
   .once("error", (err) => {
     console.log("Failed To Create HTTP Server", err);

@@ -1,16 +1,46 @@
 import Contacts from "@/components/Contacts";
 import Search from "@/components/Search";
 import { useSelectedContactStore } from "@/store/UseSelectedContactStore";
+import { useUser } from "@clerk/clerk-react";
+import { useEffect } from "react";
 import { Outlet } from "react-router-dom";
+import axios from "axios";
+import { socket } from "@/App";
 
 function ChatPage() {
   const selectedContact = useSelectedContactStore(
     (state) => state.selectedContact
   );
-  console.log(selectedContact);
+  const { user: currentUser } = useUser();
+  useEffect(() => {
+    if (!currentUser) return;
+    axios
+      .post("http://localhost:8000/users/authorize", {
+        fullname: currentUser?.fullName,
+        email: currentUser?.emailAddresses[0].emailAddress,
+        avatarUrl: currentUser?.imageUrl,
+        userId: currentUser.id,
+      })
+      .then(() => {
+        location.reload();
+      })
+      .catch((err) => {
+        if (err.status == 409) return;
+        console.log("Response Error", err);
+      });
+  }, [currentUser]);
+  useEffect(() => {
+    if (!currentUser?.id) return;
+    axios.post(
+      `http://localhost:8000/users/user/${currentUser?.id}/registerSocketId`,
+      {
+        socketId: socket.id,
+      }
+    );
+  }, [currentUser?.id]);
   return (
     <div>
-      {selectedContact.username !== "" ? (
+      {selectedContact.fullname !== "" ? (
         <Outlet />
       ) : (
         <>

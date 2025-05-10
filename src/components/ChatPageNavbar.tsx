@@ -5,6 +5,8 @@ import { FaPlus } from "react-icons/fa6";
 
 import { useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
+import SearchFriends from "./SearchFriends";
+import { Button } from "./ui/button";
 
 type Tabs = "Chats";
 enum TabsPath {
@@ -15,6 +17,7 @@ export default function ChatPageNavbar() {
   const [selectedTab, setSelectedTab] = useState<Tabs>(
     url.pathname == TabsPath.Chats ? "Chats" : "Chats"
   );
+  const [open, setOpen] = useState(false);
   const navigate = useNavigate();
   const handleTabSwitch = () => {
     setSelectedTab("Chats");
@@ -42,12 +45,14 @@ export default function ChatPageNavbar() {
         </span>
       </div>
       <div className="flex items-center gap-5 w-20 mr-5">
-        <button
-          className="rounded-full bg-indigo-500 text-white p-2
+        <Button
+          className="rounded-full bg-indigo-500 text-white py-5
       "
+          onClick={() => setOpen(true)}
         >
           <FaPlus className="text-xl" />
-        </button>
+        </Button>
+        <SearchFriends open={open} setOpen={setOpen} />
         <ClerkLoaded>
           <UserButton
             appearance={{

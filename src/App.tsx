@@ -7,6 +7,10 @@ import ChatLayout from "./layouts/ChatLayout";
 import Chat from "./components/Chat";
 import { useEffect } from "react";
 import { io } from "socket.io-client";
+import axios from "axios";
+// TODO: Fix the bug of duplet messages
+axios.defaults.url = "http://localhost:8000";
+axios.defaults.withCredentials = true;
 const router = createBrowserRouter([
   {
     path: "/",

@@ -1,6 +1,7 @@
-import { User } from "@/types/UserTypes";
+import { SelectedContact } from "@/types/UserTypes";
 
-export const emptyUser: User = {
-  username: "",
+export const emptyUser: SelectedContact = {
+  fullname: "",
   avatarUrl: "",
+  _id: "",
 };

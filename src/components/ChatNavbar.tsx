@@ -15,7 +15,6 @@ function ChatNavbar({ contactInfo }: ChatNavbarProps) {
   const navigate = useNavigate();
   const handleBackToChats = () => {
     updateContact(emptyUser);
-    //TODO: call a api and store all the chats
     navigate("/chat/me/chats");
   };
   return (
@@ -28,7 +27,7 @@ function ChatNavbar({ contactInfo }: ChatNavbarProps) {
         <AvatarImage src={contactInfo.avatarUrl} />
       </Avatar>
       <div className="w-full cursor-pointer">
-        <span className="font-semibold text-xl">{contactInfo.username}</span>
+        <span className="font-semibold text-xl">{contactInfo.fullname}</span>
       </div>
     </div>
   );
