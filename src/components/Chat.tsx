@@ -37,10 +37,13 @@ function Chat() {
     setMessage("");
   };
   useEffect(() => {
+    if (!socket.id) return;
     const handleReceive = (recieved_msg: UserMessage) => {
-      updateMessages(recieved_msg);
+      updateMessages(
+        recieved_msg,
+        recieved_msg.senderId == socket.id ? "sender" : "receiver"
+      );
     };
-
     socket.on("recieve_message", handleReceive);
     return () => {
       socket.off("recieve_message", handleReceive);
@@ -80,12 +83,12 @@ function Chat() {
         {messages.length
           ? messages.map((chat) => (
               <div
+                key={chat._id}
                 className={`chat ${
                   chat.senderName == currentUser.fullName
                     ? "chat-end"
                     : "chat-start"
                 }`}
-                key={chat.message}
               >
                 <div className="chat-bubble font-medium">{chat.message}</div>
               </div>

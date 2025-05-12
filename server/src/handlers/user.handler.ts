@@ -1,6 +1,7 @@
 import { Request, Response } from "express";
 import { ResponseMessage } from "../utils/responseMessage";
 import { UserModel as User } from "../models/user.model";
+import { RequestDetailsType } from "../types/RequestDetailsType";
 const authorizeUser = async (req: Request, res: Response) => {
   const { email, fullname, userId, avatarUrl } = req.body;
   if (!(email || fullname || userId || avatarUrl)) {
@@ -19,6 +20,8 @@ const authorizeUser = async (req: Request, res: Response) => {
       contactList: [],
       _id: userId,
       conversationIds: {},
+      requestedList: [],
+      requestList: [],
     });
     res
       .status(201)
@@ -48,16 +51,37 @@ const fetchUsers = async (req: Request, res: Response) => {
     }
     const currentUserContactList = currentUser?.contactList as string[];
     if (currentUserContactList.length == 0) {
+      const otherUsers = allUsers.map((user) => {
+        const plainUser = user.toObject();
+        return currentUser?.requestedList?.includes(user.id)
+          ? {
+              ...plainUser,
+              isRequested: true,
+            }
+          : {
+              ...plainUser,
+              isRequested: false,
+            };
+      });
       res.status(200).json(
         new ResponseMessage("Successfully fetched users", 200, true, {
-          usersList: allUsers,
+          usersList: otherUsers,
         })
       );
       return;
     } else {
-      const otherUsers = allUsers.filter(
-        (user) => !currentUserContactList.includes(user.id)
-      );
+      const otherUsers = allUsers
+        .filter((user) => !currentUserContactList.includes(user.id))
+        .map((user) => {
+          const plainUser = user.toObject();
+          return currentUser?.requestedList?.includes(user.id)
+            ? {
+                ...plainUser,
+                isRequested: true,
+              }
+            : { ...plainUser, isRequested: false };
+        });
+      console.log("Other users", otherUsers);
       res.status(200).json(
         new ResponseMessage("Successfully fetched users", 200, true, {
           usersList: otherUsers,
@@ -208,10 +232,168 @@ const getSocketIds = async (req: Request, res: Response) => {
     return;
   }
 };
+const sendFriendRequest = async (req: Request, res: Response) => {
+  const { requester, accepter } = req.params;
+  if (!(requester || accepter)) {
+    res
+      .status(400)
+      .json(
+        new ResponseMessage(
+          "Both requester and accepter is required",
+          400,
+          false
+        )
+      );
+    return;
+  }
+  try {
+    const accepterUser = await User.findById(accepter);
+    const requesterUser = await User.findById(requester);
+    if (!accepterUser) {
+      res
+        .status(404)
+        .json(new ResponseMessage("Accepter user not found", 404, false));
+      return;
+    }
+    if (!requesterUser) {
+      res
+        .status(404)
+        .json(new ResponseMessage("Requested user not found", 404, false));
+      return;
+    }
+    accepterUser.requestList?.push(requester);
+    requesterUser.requestedList?.push(accepter);
+    await accepterUser.save();
+    await requesterUser.save();
+    res
+      .status(200)
+      .json(
+        new ResponseMessage(
+          `Request sent to ${requesterUser.fullname.split(" ")[0]}`,
+          200,
+          true
+        )
+      );
+  } catch (err) {
+    console.log("Failed to send friend request", err);
+
+    res
+      .status(500)
+      .json(new ResponseMessage("Failed to send friend request", 500, false));
+  }
+};
+const fetchFriendRequest = async (req: Request, res: Response) => {
+  const { userId } = req.params;
+  if (!userId) {
+    res
+      .status(400)
+      .json(new ResponseMessage("User id is required", 400, false));
+    return;
+  }
+  try {
+    const currentUser = await User.findById(userId).populate("requestList");
+    if (!currentUser) {
+      res.status(404).json(new ResponseMessage("User not found", 404, false));
+      return;
+    }
+
+    const friendRequestList = currentUser?.requestList || [];
+    res.status(200).json(
+      new ResponseMessage("Successfully fetch request list", 200, true, {
+        friendRequestList,
+      })
+    );
+  } catch (err) {
+    console.log("Failed to fetch friend requests", err);
+    res
+      .status(500)
+      .json(new ResponseMessage("Failed to fetch friend requests", 500, false));
+  }
+};
+const acceptRejectFriendRequest = async (req: Request, res: Response) => {
+  const { type } = req.params;
+  console.log("Type", type);
+  const { requestDetails }: { requestDetails: RequestDetailsType } = req.body;
+  if (!type) {
+    res
+      .status(400)
+      .json(
+        new ResponseMessage("Accept or reject type is required", 400, false)
+      );
+    return;
+  }
+  if (!requestDetails) {
+    res
+      .status(400)
+      .json(new ResponseMessage("Request details is required", 400, false));
+    return;
+  }
+  if (type == "accept") {
+    const accepterUser = await User.findById(requestDetails.accepterId);
+    const senderUser = await User.findById(requestDetails.requesterId);
+    if (!accepterUser) {
+      res
+        .status(404)
+        .json(new ResponseMessage("Accepter user not found", 404, false));
+      return;
+    }
+    if (!senderUser) {
+      res
+        .status(404)
+        .json(new ResponseMessage("Requester user not found", 404, false));
+      return;
+    }
+    accepterUser.requestList =
+      accepterUser.requestList?.filter(
+        (id) => id.toString() !== requestDetails.requesterId.toString()
+      ) || [];
+
+    accepterUser.contactList.push(requestDetails.requesterId);
+
+    senderUser.requestedList = senderUser.requestedList?.filter(
+      (id) => id.toString() !== requestDetails.accepterId.toString()
+    );
+
+    await accepterUser.save();
+    await senderUser.save();
+
+    res
+      .status(200)
+      .json(new ResponseMessage("Accpeted friend request", 200, true));
+  } else if (type == "reject") {
+    const accepterUser = await User.findById(requestDetails.accepterId);
+    const senderUser = await User.findById(requestDetails.requesterId);
+    if (!accepterUser) {
+      res
+        .status(404)
+        .json(new ResponseMessage("Accepter user not found", 404, false));
+      return;
+    }
+    if (!senderUser) {
+      res
+        .status(404)
+        .json(new ResponseMessage("Requester user not found", 404, false));
+      return;
+    }
+    accepterUser.requestList?.filter((id) => id !== requestDetails.requesterId);
+    senderUser.requestedList?.filter((id) => id !== requestDetails.accepterId);
+    await accepterUser.save();
+    await senderUser.save();
+
+    res
+      .status(200)
+      .json(new ResponseMessage("Rejected friend request", 200, true));
+  } else {
+    res.status(400).json(new ResponseMessage("Wrong mehtod type", 400, false));
+  }
+};
 export {
   authorizeUser,
   fetchUsers,
   getContactListUsers,
   registerSocketId,
   getSocketIds,
+  sendFriendRequest,
+  fetchFriendRequest,
+  acceptRejectFriendRequest,
 };

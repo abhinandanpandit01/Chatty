@@ -3,8 +3,9 @@ interface IUserSchema extends Document {
   fullname: string;
   email: string;
   avatarUrl: string;
-  contactList: [string];
-  requestList?: [string];
+  contactList: string[];
+  requestList: string[];
+  requestedList: string[];
   _id: string;
   conversationIds: Map<string, string>;
   socketId: string;
@@ -43,12 +44,20 @@ const UserSchema = new Schema<IUserSchema>({
     {
       type: String,
       ref: "User",
+      required: true,
     },
   ],
   socketId: {
     type: String,
     default: "",
   },
+  requestedList: [
+    {
+      type: String,
+      ref: "User",
+      required: true,
+    },
+  ],
 });
 
 export const UserModel = model<IUserSchema>("User", UserSchema);

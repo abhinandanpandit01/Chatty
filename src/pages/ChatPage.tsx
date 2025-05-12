@@ -6,10 +6,15 @@ import { useEffect } from "react";
 import { Outlet } from "react-router-dom";
 import axios from "axios";
 import { socket } from "@/App";
+import { useMessagesStore } from "@/store/ChatsStore";
 
 function ChatPage() {
   const selectedContact = useSelectedContactStore(
     (state) => state.selectedContact
+  );
+  const clearMessages = useMessagesStore((state) => state.clearMessages);
+  const clearSelectedContact = useSelectedContactStore(
+    (state) => state.clearSelectedContact
   );
   const { user: currentUser } = useUser();
   useEffect(() => {
@@ -38,6 +43,10 @@ function ChatPage() {
       }
     );
   }, [currentUser?.id]);
+  useEffect(() => {
+    clearMessages();
+    clearSelectedContact();
+  }, [clearMessages, clearSelectedContact]);
   return (
     <div>
       {selectedContact.fullname !== "" ? (

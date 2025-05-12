@@ -5,6 +5,9 @@ import {
   getContactListUsers,
   registerSocketId,
   getSocketIds,
+  sendFriendRequest,
+  fetchFriendRequest,
+  acceptRejectFriendRequest,
 } from "../handlers/user.handler";
 import { checkIfUserExists } from "../middlewares/auth.middleware";
 
@@ -14,7 +17,10 @@ router.get("/test", (req, res) => {
 });
 router.post("/authorize", checkIfUserExists, authorizeUser);
 router.post("/user/:userId/registerSocketId", registerSocketId);
+router.post("/sendFriendRequest/:requester/:accepter", sendFriendRequest);
+router.post("/respondFriendRequest/:type", acceptRejectFriendRequest);
 router.get("/socketIds", getSocketIds);
 router.get("/allUsers", fetchUsers);
 router.get("/contactListUsers", getContactListUsers);
+router.get("/friendRequests/:userId", fetchFriendRequest);
 export default router;

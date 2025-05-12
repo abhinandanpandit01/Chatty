@@ -2,11 +2,12 @@ import { ClerkLoaded, UserButton } from "@clerk/clerk-react";
 import { TbMessageCircleFilled } from "react-icons/tb";
 import { TbMessageCircle } from "react-icons/tb";
 import { FaPlus } from "react-icons/fa6";
-
+import { FaBell } from "react-icons/fa";
 import { useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import SearchFriends from "./SearchFriends";
 import { Button } from "./ui/button";
+import FriendRequestList from "./FriendRequestList";
 
 type Tabs = "Chats";
 enum TabsPath {
@@ -18,6 +19,8 @@ export default function ChatPageNavbar() {
     url.pathname == TabsPath.Chats ? "Chats" : "Chats"
   );
   const [open, setOpen] = useState(false);
+  const [showIndicator, setShowIndicator] = useState(false);
+  const [isOpenFriendRequest, setIsOpenFriendRequest] = useState(false);
   const navigate = useNavigate();
   const handleTabSwitch = () => {
     setSelectedTab("Chats");
@@ -44,15 +47,33 @@ export default function ChatPageNavbar() {
           </span>
         </span>
       </div>
-      <div className="flex items-center gap-5 w-20 mr-5">
+      <div className="flex items-center gap-5 w-20 mr-20">
         <Button
-          className="rounded-full bg-indigo-500 text-white py-5
+          className="rounded-full bg-indigo-500 text-white py-5 px-3
       "
           onClick={() => setOpen(true)}
         >
           <FaPlus className="text-xl" />
         </Button>
         <SearchFriends open={open} setOpen={setOpen} />
+        <div className="indicator">
+          <Button
+            className="rounded-full bg-indigo-500 text-white py-5 px-3 relative"
+            onClick={() => setIsOpenFriendRequest(true)}
+          >
+            {showIndicator && (
+              <span className="indicator-item status status-success"></span>
+            )}
+            <div className="grid place-items-center">
+              <FaBell className="text-lg" />
+            </div>
+          </Button>
+        </div>
+        <FriendRequestList
+          open={isOpenFriendRequest}
+          setOpen={setIsOpenFriendRequest}
+          setIndicator={setShowIndicator}
+        />
         <ClerkLoaded>
           <UserButton
             appearance={{
