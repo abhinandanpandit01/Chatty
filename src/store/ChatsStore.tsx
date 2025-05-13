@@ -11,17 +11,18 @@ type MessagesStore = {
   clearMessages: () => void;
   loadChatOnVisit: (currentUserName: string, contactName: string) => void;
 };
-
 export const useMessagesStore = create<MessagesStore>()(
   persist(
     (set) => ({
       messages: [],
       updateMessages: async (message, role) => {
         if (role == "receiver") {
+          console.log("Message", message, "Role", role);
           set((state) => ({ messages: [...state.messages, message] }));
           return;
         }
         try {
+          console.log("Message", message, "Role", role);
           const res = await axios.post(
             `http://localhost:8000/chats/saveChats/${message.senderName}/${message.receiverName}`,
             {

@@ -9,7 +9,11 @@ import { UserMessage } from "../../server/src/types/MessageTypes";
 import { useMessagesStore } from "@/store/ChatsStore";
 import { useUser } from "@clerk/clerk-react";
 import { useLocation } from "react-router-dom";
+import EmojiPicker from "emoji-picker-react";
+import { BsFillImageFill } from "react-icons/bs";
 import axios from "axios";
+import FileUploadDialogue from "./FileUploadDialogue";
+
 function Chat() {
   const messages = useMessagesStore((state) => state.messages);
   const updateMessages = useMessagesStore((state) => state.updateMessages);
@@ -21,6 +25,7 @@ function Chat() {
   const url = useLocation();
   const recieverName = url.pathname.split("/")[2];
   const [open, setOpen] = useState<boolean>(false);
+  const fileUploadModalRef = useRef<HTMLDialogElement>(null);
   const [message, setMessage] = useState("");
   const { user: currentUser } = useUser();
   const bottomRef = useRef<HTMLDivElement>(null);
@@ -49,11 +54,12 @@ function Chat() {
       socket.off("recieve_message", handleReceive);
     };
   }, [updateMessages]);
+
   useEffect(() => {
     loadChatOnVist(currentUser?.fullName as string, contactInfo.fullname);
   }, [loadChatOnVist, contactInfo.fullname, currentUser?.fullName]);
   useEffect(() => {
-    if (!currentUser?.id) return;
+    if (!currentUser?.id || !contactInfo._id) return;
     axios.post(
       `http://localhost:8000/users/user/${currentUser.id}/registerSocketId`,
       {
@@ -90,13 +96,22 @@ function Chat() {
                     : "chat-start"
                 }`}
               >
-                <div className="chat-bubble font-medium">{chat.message}</div>
+                <div className="chat-bubble font-medium h-fit">
+                  {chat.message}
+                </div>
               </div>
             ))
           : null}
         <div ref={bottomRef} />
       </div>
       <div className="w-full flex items-center px-5 gap-5 mt-1 relative">
+        <Button
+          className="rounded-full py-5"
+          onClick={() => fileUploadModalRef.current?.showModal()}
+        >
+          <BsFillImageFill />
+        </Button>
+        <FileUploadDialogue modelRef={fileUploadModalRef} />
         <Input
           className="w-full py-6 rounded-full"
           value={message}
@@ -104,6 +119,7 @@ function Chat() {
           onKeyDown={(e) => {
             if (e.key == "Enter") {
               handleSendMessage();
+              setOpen(false);
             }
           }}
           placeholder="Type..."
@@ -111,6 +127,14 @@ function Chat() {
         <Button className="rounded-full" onClick={() => setOpen(!open)}>
           <SmilePlus />
         </Button>
+        <div className="absolute bottom-[4rem] right-[5rem]">
+          <EmojiPicker
+            open={open}
+            onEmojiClick={(emojiData) => {
+              setMessage((e) => (e += emojiData.emoji));
+            }}
+          />
+        </div>
         <Button className="rounded-full">
           <SendHorizontal />
         </Button>

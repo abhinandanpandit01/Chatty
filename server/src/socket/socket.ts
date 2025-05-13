@@ -7,6 +7,7 @@ export const socketFunctions = async () => {
     socketId = socket.id;
     // socket workspace
     socket.on("send_message", (message: UserMessage) => {
+      console.log("Sent Message:", message);
       socketServer.to(message.receiverId).emit("recieve_message", message);
       socketServer.to(message.senderId).emit("recieve_message", message);
     });
