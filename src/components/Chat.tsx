@@ -13,7 +13,8 @@ import EmojiPicker from "emoji-picker-react";
 import { BsFillImageFill } from "react-icons/bs";
 import axios from "axios";
 import FileUploadDialogue from "./FileUploadDialogue";
-
+import { PhotoView } from "react-photo-view";
+import "react-photo-view/dist/react-photo-view.css";
 function Chat() {
   const messages = useMessagesStore((state) => state.messages);
   const updateMessages = useMessagesStore((state) => state.updateMessages);
@@ -54,7 +55,7 @@ function Chat() {
       socket.off("recieve_message", handleReceive);
     };
   }, [updateMessages]);
-
+  console.log(messages);
   useEffect(() => {
     loadChatOnVist(currentUser?.fullName as string, contactInfo.fullname);
   }, [loadChatOnVist, contactInfo.fullname, currentUser?.fullName]);
@@ -97,7 +98,17 @@ function Chat() {
                 }`}
               >
                 <div className="chat-bubble font-medium h-fit">
-                  {chat.message}
+                  {chat.message !== ""
+                    ? chat.message
+                    : chat.attactments?.map((url) => (
+                        <PhotoView src={url}>
+                          <img
+                            src={url}
+                            alt=""
+                            className="md:w-[20rem] w-[12rem]"
+                          />
+                        </PhotoView>
+                      ))}
                 </div>
               </div>
             ))

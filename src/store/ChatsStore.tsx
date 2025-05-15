@@ -4,7 +4,10 @@ import { create } from "zustand";
 import axios from "axios";
 
 type Messages = UserMessage[];
-
+enum Status {
+  Loading,
+  Normal,
+}
 type MessagesStore = {
   messages: Messages;
   updateMessages: (message: UserMessage, role?: "receiver" | "sender") => void;
@@ -17,12 +20,10 @@ export const useMessagesStore = create<MessagesStore>()(
       messages: [],
       updateMessages: async (message, role) => {
         if (role == "receiver") {
-          console.log("Message", message, "Role", role);
           set((state) => ({ messages: [...state.messages, message] }));
           return;
         }
         try {
-          console.log("Message", message, "Role", role);
           const res = await axios.post(
             `http://localhost:8000/chats/saveChats/${message.senderName}/${message.receiverName}`,
             {
@@ -30,17 +31,18 @@ export const useMessagesStore = create<MessagesStore>()(
                 message: message.message,
                 senderName: message.senderName,
                 receiverName: message.receiverName,
+                attactments: message.attactments,
               },
             }
           );
-          set((state) => ({ messages: [...state.messages, res.data.data] }));
+          set((state) => ({
+            messages: [...state.messages, res.data.data],
+          }));
         } catch (err) {
           console.error("Failed to save message", err);
         }
       },
-      clearMessages: () => {
-        set({ messages: [] });
-      },
+      clearMessages: () => {},
       loadChatOnVisit: async (currentUserName, contactName) => {
         try {
           const res = await axios.get(

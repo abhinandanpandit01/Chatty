@@ -12,7 +12,6 @@ const chatSchema = new Schema<IChatSchema>(
   {
     message: {
       type: String,
-      required: [true, "Message must not be empty"],
     },
     attactments: {
       type: Array,

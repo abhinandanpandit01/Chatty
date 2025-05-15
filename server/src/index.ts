@@ -8,6 +8,8 @@ import { socketFunctions } from "./socket/socket";
 import userRouter from "./routes/user.router";
 import mongoose from "mongoose";
 import { chatRouter } from "./routes/chat.router";
+import { ImageFileRouter } from "./routes/imageFile.router";
+import { upload } from "./middlewares/multer.middleware";
 const expressServer = express();
 expressServer.use(express.json());
 expressServer.use(
@@ -35,6 +37,7 @@ export const socketServer = new Server(httpServer, {
 socketFunctions();
 expressServer.use("/users", userRouter);
 expressServer.use("/chats", chatRouter);
+expressServer.use("/files", upload.array("images", 10), ImageFileRouter);
 httpServer
   .once("error", (err) => {
     console.log("Failed To Create HTTP Server", err);
