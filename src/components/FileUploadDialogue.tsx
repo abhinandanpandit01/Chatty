@@ -1,15 +1,13 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { Button } from "./ui/button";
 import { IoSend } from "react-icons/io5";
 import { MdCancel } from "react-icons/md";
 import { toast } from "sonner";
 import axios from "axios";
-import { socket } from "@/App";
 import { UserMessage } from "server/src/types/MessageTypes";
-import { useMessagesStore } from "@/store/ChatsStore";
 import { useSelectedContactStore } from "@/store/UseSelectedContactStore";
 import { useUser } from "@clerk/clerk-react";
-
+import { useUserSocket } from "@/store/UseSocketStore";
 type FileUploadDialogueProps = {
   modelRef: React.RefObject<HTMLDialogElement | null>;
 };
@@ -17,8 +15,8 @@ type FileUploadDialogueProps = {
 function FileUploadDialogue({ modelRef }: FileUploadDialogueProps) {
   const [files, setFiles] = useState<FileList | null>(null);
   const [loading, setLoading] = useState(false);
-  const updateMessages = useMessagesStore((state) => state.updateMessages);
   const contactInfo = useSelectedContactStore((state) => state.selectedContact);
+  const socket = useUserSocket((state) => state.socket);
   const { user: currentUser } = useUser();
   const handleSendFile = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -39,7 +37,7 @@ function FileUploadDialogue({ modelRef }: FileUploadDialogueProps) {
       const imageUrls = responseUploadImages.data.data.imageFilesUrl;
       console.log(responseUploadImages.data.data);
       const new_message: UserMessage = {
-        senderId: socket.id as string,
+        senderId: socket?.id as string,
         receiverId: contactInfo.socketId as string,
         message: "",
         senderName: currentUser?.fullName as string,
@@ -48,7 +46,7 @@ function FileUploadDialogue({ modelRef }: FileUploadDialogueProps) {
         attactments: imageUrls,
       };
       console.log("Send Messages", new_message);
-      socket.emit("send_message", new_message);
+      socket?.emit("send_message", new_message);
     } catch (err) {
       toast.error("Failed to upload images");
       console.log("Failed to upload images", err);
@@ -56,19 +54,6 @@ function FileUploadDialogue({ modelRef }: FileUploadDialogueProps) {
     setLoading(false);
     modelRef.current?.close();
   };
-  useEffect(() => {
-    if (!socket.id) return;
-    const handleReceive = (recieved_msg: UserMessage) => {
-      updateMessages(
-        recieved_msg,
-        recieved_msg.senderId == socket.id ? "sender" : "receiver"
-      );
-    };
-    socket.on("recieve_message", handleReceive);
-    return () => {
-      socket.off("recieve_message", handleReceive);
-    };
-  }, [updateMessages]);
   return (
     <dialog className="modal modal-middle" ref={modelRef}>
       <div className="modal-box">

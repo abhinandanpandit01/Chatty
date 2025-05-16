@@ -14,7 +14,7 @@ const expressServer = express();
 expressServer.use(express.json());
 expressServer.use(
   cors({
-    origin: "http://localhost:5173",
+    origin: "*",
     credentials: true,
   })
 );
@@ -29,7 +29,7 @@ mongoose
 const httpServer = createServer(expressServer);
 export const socketServer = new Server(httpServer, {
   cors: {
-    origin: "http://localhost:5173",
+    origin: "*",
     credentials: true,
   },
 });

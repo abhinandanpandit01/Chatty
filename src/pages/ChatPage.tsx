@@ -4,8 +4,8 @@ import { useUser } from "@clerk/clerk-react";
 import { useEffect } from "react";
 import { Outlet } from "react-router-dom";
 import axios from "axios";
-import { socket } from "@/App";
 import { useMessagesStore } from "@/store/ChatsStore";
+import { useUserSocket } from "@/store/UseSocketStore";
 
 function ChatPage() {
   const selectedContact = useSelectedContactStore(
@@ -15,6 +15,7 @@ function ChatPage() {
   const clearSelectedContact = useSelectedContactStore(
     (state) => state.clearSelectedContact
   );
+  const socket = useUserSocket((state) => state.socket);
   const { user: currentUser } = useUser();
   useEffect(() => {
     if (!currentUser) return;
@@ -38,10 +39,10 @@ function ChatPage() {
     axios.post(
       `http://localhost:8000/users/user/${currentUser?.id}/registerSocketId`,
       {
-        socketId: socket.id,
+        socketId: socket?.id,
       }
     );
-  }, [currentUser?.id]);
+  }, [currentUser?.id, socket]);
   useEffect(() => {
     clearMessages();
     clearSelectedContact();

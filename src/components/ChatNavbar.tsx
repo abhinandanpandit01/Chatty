@@ -1,20 +1,22 @@
 import { User } from "@/types/UserTypes";
 import { Avatar, AvatarImage } from "./ui/avatar";
 import { IoIosArrowBack } from "react-icons/io";
-import { emptyUser } from "@/constants/EmptyUser";
 import { useSelectedContactStore } from "@/store/UseSelectedContactStore";
 import { useNavigate } from "react-router-dom";
+import { useMessagesStore } from "@/store/ChatsStore";
 
 type ChatNavbarProps = {
   contactInfo: User;
 };
 function ChatNavbar({ contactInfo }: ChatNavbarProps) {
-  const updateContact = useSelectedContactStore(
-    (state) => state.updateSelectedContact
+  const clearSelectedContact = useSelectedContactStore(
+    (state) => state.clearSelectedContact
   );
+  const clearMessages = useMessagesStore((state) => state.clearMessages);
   const navigate = useNavigate();
   const handleBackToChats = () => {
-    updateContact(emptyUser);
+    clearSelectedContact();
+    clearMessages();
     navigate("/chat/me/chats");
   };
   return (

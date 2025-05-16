@@ -3,7 +3,6 @@ import ChatNavbar from "./ChatNavbar";
 import { Input } from "./ui/input";
 import { Button } from "./ui/button";
 import { SendHorizontal, SmilePlus } from "lucide-react";
-import { socket } from "@/App";
 import { useEffect, useRef, useState } from "react";
 import { UserMessage } from "../../server/src/types/MessageTypes";
 import { useMessagesStore } from "@/store/ChatsStore";
@@ -15,6 +14,7 @@ import axios from "axios";
 import FileUploadDialogue from "./FileUploadDialogue";
 import { PhotoView } from "react-photo-view";
 import "react-photo-view/dist/react-photo-view.css";
+import { useUserSocket } from "@/store/UseSocketStore";
 function Chat() {
   const messages = useMessagesStore((state) => state.messages);
   const updateMessages = useMessagesStore((state) => state.updateMessages);
@@ -23,6 +23,7 @@ function Chat() {
   const updateSelectedContactSocketId = useSelectedContactStore(
     (state) => state.updateSelectedContactSocketId
   );
+  const socket = useUserSocket((state) => state.socket);
   const url = useLocation();
   const recieverName = url.pathname.split("/")[2];
   const [open, setOpen] = useState<boolean>(false);
@@ -32,18 +33,18 @@ function Chat() {
   const bottomRef = useRef<HTMLDivElement>(null);
   const handleSendMessage = async () => {
     const new_message: UserMessage = {
-      senderId: socket.id as string,
+      senderId: socket?.id as string,
       receiverId: contactInfo.socketId as string,
       message: message,
       senderName: currentUser?.fullName as string,
       receiverName: recieverName as string,
       conversationId: "",
     };
-    socket.emit("send_message", new_message);
+    socket?.emit("send_message", new_message);
     setMessage("");
   };
   useEffect(() => {
-    if (!socket.id) return;
+    if (!socket?.id) return;
     const handleReceive = (recieved_msg: UserMessage) => {
       updateMessages(
         recieved_msg,
@@ -54,7 +55,7 @@ function Chat() {
     return () => {
       socket.off("recieve_message", handleReceive);
     };
-  }, [updateMessages]);
+  }, [updateMessages, socket]);
   console.log(messages);
   useEffect(() => {
     loadChatOnVist(currentUser?.fullName as string, contactInfo.fullname);
@@ -64,7 +65,7 @@ function Chat() {
     axios.post(
       `http://localhost:8000/users/user/${currentUser.id}/registerSocketId`,
       {
-        socketId: socket.id,
+        socketId: socket?.id,
       }
     );
     axios
@@ -78,7 +79,7 @@ function Chat() {
       .catch((err) => {
         console.log("Failed to fetch socket ids", err);
       });
-  }, [currentUser?.id, contactInfo._id, updateSelectedContactSocketId]);
+  }, [currentUser?.id, contactInfo._id, updateSelectedContactSocketId, socket]);
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
@@ -117,14 +118,15 @@ function Chat() {
       </div>
       <div className="w-full flex items-center px-5 gap-5 mt-1 relative">
         <Button
-          className="rounded-full py-5"
+          className="rounded-full py-5 absolute right-[9.5rem] opacity-60 hover:opacity-100"
           onClick={() => fileUploadModalRef.current?.showModal()}
+          variant={"ghost"}
         >
           <BsFillImageFill />
         </Button>
         <FileUploadDialogue modelRef={fileUploadModalRef} />
         <Input
-          className="w-full py-6 rounded-full"
+          className="w-full py-6 rounded-full pr-12"
           value={message}
           onChange={(e) => setMessage(e.target.value)}
           onKeyDown={(e) => {

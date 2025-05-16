@@ -4,10 +4,6 @@ import { create } from "zustand";
 import axios from "axios";
 
 type Messages = UserMessage[];
-enum Status {
-  Loading,
-  Normal,
-}
 type MessagesStore = {
   messages: Messages;
   updateMessages: (message: UserMessage, role?: "receiver" | "sender") => void;
@@ -42,7 +38,9 @@ export const useMessagesStore = create<MessagesStore>()(
           console.error("Failed to save message", err);
         }
       },
-      clearMessages: () => {},
+      clearMessages: () => {
+        set({ messages: [] });
+      },
       loadChatOnVisit: async (currentUserName, contactName) => {
         try {
           const res = await axios.get(
