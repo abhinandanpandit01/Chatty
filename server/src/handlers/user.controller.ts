@@ -81,7 +81,6 @@ const fetchUsers = async (req: Request, res: Response) => {
               }
             : { ...plainUser, isRequested: false };
         });
-      console.log("Other users", otherUsers);
       res.status(200).json(
         new ResponseMessage("Successfully fetched users", 200, true, {
           usersList: otherUsers,
@@ -312,7 +311,6 @@ const fetchFriendRequest = async (req: Request, res: Response) => {
 };
 const acceptRejectFriendRequest = async (req: Request, res: Response) => {
   const { type } = req.params;
-  console.log("Type", type);
   const { requestDetails }: { requestDetails: RequestDetailsType } = req.body;
   if (!type) {
     res

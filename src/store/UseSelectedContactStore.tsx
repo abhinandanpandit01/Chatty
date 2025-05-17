@@ -11,7 +11,13 @@ type SelectedContactStore = {
 export const useSelectedContactStore = create<SelectedContactStore>()(
   persist(
     (set, get) => ({
-      selectedContact: { avatarUrl: "", fullname: "", _id: "", socketId: "" },
+      selectedContact: {
+        avatarUrl: "",
+        fullname: "",
+        _id: "",
+        socketId: "",
+        status: "offline",
+      },
       updateSelectedContact: (userInfo) => {
         set(() => ({ selectedContact: userInfo }));
       },
@@ -22,6 +28,7 @@ export const useSelectedContactStore = create<SelectedContactStore>()(
             fullname: "",
             _id: "",
             socketId: "",
+            status: "offline",
           },
         }));
       },

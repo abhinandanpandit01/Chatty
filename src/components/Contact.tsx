@@ -5,12 +5,14 @@ import { SelectedContact, User } from "@/types/UserTypes";
 
 type ContactProps = {
   userInfo: User;
+  isOnline: boolean;
 };
-function Contact({ userInfo }: ContactProps) {
+function Contact({ userInfo, isOnline }: ContactProps) {
   const navigate = useNavigate();
   const updateContact = useSelectedContactStore(
     (state) => state.updateSelectedContact
   );
+  const status = isOnline;
   return (
     <div
       className="w-full flex gap-5 items-center"
@@ -20,18 +22,29 @@ function Contact({ userInfo }: ContactProps) {
           avatarUrl: userInfo.avatarUrl,
           _id: userInfo._id,
           socketId: userInfo.socketId,
+          status: userInfo.status,
         };
         updateContact(newContact);
       }}
     >
-      <Avatar className="w-12 h-12">
-        <AvatarImage src={userInfo.avatarUrl} />
-      </Avatar>
+      <div className="indicator">
+        <span
+          className={`indicator-item ${status ? "status" : ""} status-success`}
+        ></span>
+        <div className="grid place-items-center">
+          <Avatar className="w-12 h-12">
+            <AvatarImage src={userInfo.avatarUrl} />
+          </Avatar>
+        </div>
+      </div>
       <div
-        className="w-full border-b-2 cursor-pointer py-4 "
+        className="w-full border-b-2 cursor-pointer py-4 flex flex-col"
         onClick={() => navigate(`/chat/${userInfo.fullname}`)}
       >
         <span className="font-semibold text-xl">{userInfo.fullname}</span>
+        <span className="text-xs font-bold text-neutral-400">
+          {status ? "Online" : "Offline"}
+        </span>
       </div>
     </div>
   );

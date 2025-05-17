@@ -9,6 +9,7 @@ interface IUserSchema extends Document {
   _id: string;
   conversationIds: Map<string, string>;
   socketId: string;
+  status: "online" | "offline";
 }
 const UserSchema = new Schema<IUserSchema>({
   _id: {
@@ -58,6 +59,11 @@ const UserSchema = new Schema<IUserSchema>({
       required: true,
     },
   ],
+  status: {
+    type: String,
+    enum: ["online", "offline"],
+    default: "offline",
+  },
 });
 
 export const UserModel = model<IUserSchema>("User", UserSchema);

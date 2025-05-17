@@ -49,7 +49,6 @@ function SearchFriends({ open, setOpen }: SearchFriendsProps) {
         });
     }
   }, [currentUser]);
-  console.log(users);
   return (
     <CommandDialog open={open} onOpenChange={setOpen}>
       <CommandInput placeholder="Type a command or search..." />

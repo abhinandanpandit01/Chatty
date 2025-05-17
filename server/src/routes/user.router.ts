@@ -8,13 +8,10 @@ import {
   sendFriendRequest,
   fetchFriendRequest,
   acceptRejectFriendRequest,
-} from "../handlers/user.handler";
+} from "../handlers/user.controller";
 import { checkIfUserExists } from "../middlewares/auth.middleware";
 
 const router = Router();
-router.get("/test", (req, res) => {
-  res.send("Only for testing purposes");
-});
 router.post("/authorize", checkIfUserExists, authorizeUser);
 router.post("/user/:userId/registerSocketId", registerSocketId);
 router.post("/sendFriendRequest/:requester/:accepter", sendFriendRequest);

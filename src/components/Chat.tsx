@@ -56,7 +56,6 @@ function Chat() {
       socket.off("recieve_message", handleReceive);
     };
   }, [updateMessages, socket]);
-  console.log(messages);
   useEffect(() => {
     loadChatOnVist(currentUser?.fullName as string, contactInfo.fullname);
   }, [loadChatOnVist, contactInfo.fullname, currentUser?.fullName]);

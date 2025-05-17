@@ -35,7 +35,6 @@ function FileUploadDialogue({ modelRef }: FileUploadDialogueProps) {
         formData
       );
       const imageUrls = responseUploadImages.data.data.imageFilesUrl;
-      console.log(responseUploadImages.data.data);
       const new_message: UserMessage = {
         senderId: socket?.id as string,
         receiverId: contactInfo.socketId as string,
@@ -45,7 +44,6 @@ function FileUploadDialogue({ modelRef }: FileUploadDialogueProps) {
         conversationId: "",
         attactments: imageUrls,
       };
-      console.log("Send Messages", new_message);
       socket?.emit("send_message", new_message);
     } catch (err) {
       toast.error("Failed to upload images");
