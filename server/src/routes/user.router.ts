@@ -8,6 +8,7 @@ import {
   sendFriendRequest,
   fetchFriendRequest,
   acceptRejectFriendRequest,
+  fetchAllOnlineUsers,
 } from "../handlers/user.controller";
 import { checkIfUserExists } from "../middlewares/auth.middleware";
 
@@ -20,4 +21,5 @@ router.get("/socketIds", getSocketIds);
 router.get("/allUsers", fetchUsers);
 router.get("/contactListUsers", getContactListUsers);
 router.get("/friendRequests/:userId", fetchFriendRequest);
+router.get("/:userId/onlineUsers", fetchAllOnlineUsers);
 export default router;

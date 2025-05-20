@@ -1,9 +1,10 @@
 import { model, Schema, Document } from "mongoose";
+import { User } from "../types/UserType";
 interface IUserSchema extends Document {
   fullname: string;
   email: string;
   avatarUrl: string;
-  contactList: string[];
+  contactList: (string | User)[];
   requestList: string[];
   requestedList: string[];
   _id: string;

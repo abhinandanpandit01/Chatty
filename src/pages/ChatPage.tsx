@@ -6,6 +6,8 @@ import { Outlet } from "react-router-dom";
 import axios from "axios";
 import { useMessagesStore } from "@/store/ChatsStore";
 import { useUserSocket } from "@/store/UseSocketStore";
+import { useOnlineUsersStore } from "@/store/UseOnlineUsersStore";
+import { User } from "@/types/UserTypes";
 
 function ChatPage() {
   const selectedContact = useSelectedContactStore(
@@ -15,10 +17,28 @@ function ChatPage() {
   const clearSelectedContact = useSelectedContactStore(
     (state) => state.clearSelectedContact
   );
+  const clearOnlineUsers = useOnlineUsersStore(
+    (state) => state.clearOnlineUsers
+  );
+  const setAllOnlineUser = useOnlineUsersStore(
+    (state) => state.setAllOnlineUser
+  );
   const socket = useUserSocket((state) => state.socket);
   const { user: currentUser } = useUser();
   useEffect(() => {
     if (!currentUser) return;
+    axios
+      .get(`http://localhost:8000/users/${currentUser.id}/onlineUsers`)
+      .then((res) => {
+        const onlineContactUsers = res.data.data.onlineContactUsers;
+        const onlineContactUsersId = onlineContactUsers.map(
+          (user: User) => user._id
+        );
+        setAllOnlineUser(onlineContactUsersId);
+      })
+      .catch((err) => {
+        console.log("Failed to get all online contact users", err);
+      });
     axios
       .post("http://localhost:8000/users/authorize", {
         fullname: currentUser?.fullName,
@@ -33,20 +53,18 @@ function ChatPage() {
         if (err.status == 409) return;
         console.log("Response Error", err);
       });
-  }, [currentUser]);
-  useEffect(() => {
-    if (!currentUser?.id) return;
     axios.post(
       `http://localhost:8000/users/user/${currentUser?.id}/registerSocketId`,
       {
         socketId: socket?.id,
       }
     );
-  }, [currentUser?.id, socket]);
+  }, [currentUser, setAllOnlineUser, socket]);
   useEffect(() => {
     clearMessages();
     clearSelectedContact();
-  }, [clearMessages, clearSelectedContact]);
+    clearOnlineUsers();
+  }, [clearMessages, clearSelectedContact, clearOnlineUsers]);
   return (
     <div>
       {selectedContact.fullname !== "" ? (

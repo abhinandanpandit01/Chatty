@@ -3,14 +3,16 @@ import { persist } from "zustand/middleware";
 type UseOlineUsersStore = {
   onlineUsers: string[];
   setOnlineUser: (userId: string) => void;
+  setAllOnlineUser: (userIds: string[]) => void;
   removeOnlineUser: (userId: string) => void;
+  clearOnlineUsers: () => void;
 };
 
-export const UseOlineUsersStore = create<UseOlineUsersStore>()(
+export const useOnlineUsersStore = create<UseOlineUsersStore>()(
   persist(
     (set, get) => ({
       onlineUsers: [],
-      setOnlineUser: (userId) => {
+      setOnlineUser: async (userId) => {
         const current = get().onlineUsers;
         if (!current.includes(userId)) {
           set({ onlineUsers: [...current, userId] });
@@ -20,6 +22,12 @@ export const UseOlineUsersStore = create<UseOlineUsersStore>()(
         const previousUserIds = get().onlineUsers;
         const updatedUserIds = previousUserIds.filter((id) => id !== userId);
         set(() => ({ onlineUsers: updatedUserIds }));
+      },
+      clearOnlineUsers: () => {
+        set(() => ({ onlineUsers: [] }));
+      },
+      setAllOnlineUser: (userIds: string[]) => {
+        set(() => ({ onlineUsers: userIds }));
       },
     }),
     {

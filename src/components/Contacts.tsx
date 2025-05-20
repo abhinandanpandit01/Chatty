@@ -6,17 +6,20 @@ import { useUser } from "@clerk/clerk-react";
 import Loader from "./Loader";
 import { useUserSocket } from "@/store/UseSocketStore";
 import { ConnectionState } from "../types/ConnectionState";
-import { UseOlineUsersStore } from "@/store/UseOnlineUsersStore";
+import { useOnlineUsersStore } from "@/store/UseOnlineUsersStore";
 function Contacts() {
   const [users, setUsers] = useState<Array<User>>([]);
-  const onlineUsers = UseOlineUsersStore((state) => state.onlineUsers);
-  const setOnlineUser = UseOlineUsersStore((state) => state.setOnlineUser);
-  const removeOnlineUser = UseOlineUsersStore(
+  const onlineUsers = useOnlineUsersStore((state) => state.onlineUsers);
+  const setOnlineUser = useOnlineUsersStore((state) => state.setOnlineUser);
+  const removeOnlineUser = useOnlineUsersStore(
     (state) => state.removeOnlineUser
   );
   const { user: currentUser } = useUser();
   const [loading, setLoading] = useState(false);
   const socket = useUserSocket((state) => state.socket);
+  const setAllOnlineUser = useOnlineUsersStore(
+    (state) => state.setAllOnlineUser
+  );
   useEffect(() => {
     setLoading(true);
     axios
@@ -60,13 +63,20 @@ function Contacts() {
       socket.disconnect();
     };
     window.addEventListener("beforeunload", handleBeforeUnload);
+
     return () => {
       socket.off("get_connection_status", handleStatus);
       window.removeEventListener("beforeunload", handleBeforeUnload);
     };
-  }, [currentUser?.id, socket]);
+  }, [
+    currentUser?.id,
+    socket,
+    removeOnlineUser,
+    setAllOnlineUser,
+    setOnlineUser,
+  ]);
   return (
-    <div className="h-[75vh] flex flex-col px-8 overflow-y-scroll gap-3 pt-5 ">
+    <div className="h-[75vh] flex flex-col px-8 overflow-y-scroll gap-3 pt-5 pb-5">
       {loading ? (
         <Loader />
       ) : users.length ? (

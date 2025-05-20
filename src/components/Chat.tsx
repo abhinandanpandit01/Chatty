@@ -15,6 +15,7 @@ import FileUploadDialogue from "./FileUploadDialogue";
 import { PhotoView } from "react-photo-view";
 import "react-photo-view/dist/react-photo-view.css";
 import { useUserSocket } from "@/store/UseSocketStore";
+import { v4 as uuid } from "uuid";
 function Chat() {
   const messages = useMessagesStore((state) => state.messages);
   const updateMessages = useMessagesStore((state) => state.updateMessages);
@@ -39,6 +40,7 @@ function Chat() {
       senderName: currentUser?.fullName as string,
       receiverName: recieverName as string,
       conversationId: "",
+      _id: uuid(),
     };
     socket?.emit("send_message", new_message);
     setMessage("");
@@ -86,7 +88,7 @@ function Chat() {
   return (
     <div className="h-screen grid grid-cols-1 grid-rows-[5rem_1fr_5rem]">
       <ChatNavbar contactInfo={contactInfo} />
-      <div className="bg-sky-400 overflow-y-scroll" id="chat-container">
+      <div className="overflow-y-scroll" id="chat-container">
         {messages.length
           ? messages.map((chat) => (
               <div

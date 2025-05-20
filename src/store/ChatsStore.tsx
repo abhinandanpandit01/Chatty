@@ -28,6 +28,7 @@ export const useMessagesStore = create<MessagesStore>()(
                 senderName: message.senderName,
                 receiverName: message.receiverName,
                 attactments: message.attactments,
+                _id: message._id,
               },
             }
           );

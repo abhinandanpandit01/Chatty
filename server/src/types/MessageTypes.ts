@@ -6,5 +6,5 @@ export type UserMessage = {
   senderName: string;
   receiverName: string;
   conversationId: string;
-  _id?: string;
+  _id: string;
 };

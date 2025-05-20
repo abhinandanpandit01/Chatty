@@ -385,6 +385,44 @@ const acceptRejectFriendRequest = async (req: Request, res: Response) => {
     res.status(400).json(new ResponseMessage("Wrong mehtod type", 400, false));
   }
 };
+const fetchAllOnlineUsers = async (req: Request, res: Response) => {
+  const { userId } = req.params;
+  if (!userId) {
+    res
+      .status(400)
+      .json(new ResponseMessage("User id is required", 400, false));
+    return;
+  }
+  try {
+    const currentUser = await User.findById(userId).populate("contactList");
+    if (!currentUser) {
+      res.status(404).json(new ResponseMessage("User not found", 404, false));
+      return;
+    }
+    const contactUsers = currentUser.contactList;
+    const onlineContactUsers = contactUsers
+      .filter((user) => typeof user === "object" && user !== null)
+      .filter((contact) => contact.status === "online");
+
+    res
+      .status(200)
+      .json(
+        new ResponseMessage(
+          "Successfully fetched the online users",
+          200,
+          true,
+          { onlineContactUsers: onlineContactUsers }
+        )
+      );
+  } catch (err) {
+    console.log("Failed to fetch online contact users", err);
+    res
+      .status(500)
+      .json(
+        new ResponseMessage("Failed to fetch online contact users", 500, false)
+      );
+  }
+};
 export {
   authorizeUser,
   fetchUsers,
@@ -394,4 +432,5 @@ export {
   sendFriendRequest,
   fetchFriendRequest,
   acceptRejectFriendRequest,
+  fetchAllOnlineUsers,
 };

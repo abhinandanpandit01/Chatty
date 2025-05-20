@@ -6,10 +6,14 @@ interface IChatSchema extends Document {
   senderName: string;
   receiverName: string;
   conversationId: string;
-  isSeen: boolean;
+  _id: string;
 }
 const chatSchema = new Schema<IChatSchema>(
   {
+    _id: {
+      type: String,
+      required: true,
+    },
     message: {
       type: String,
     },
@@ -27,11 +31,6 @@ const chatSchema = new Schema<IChatSchema>(
     conversationId: {
       type: String,
       required: [true, "Conversation id is required"],
-    },
-    isSeen: {
-      type: Boolean,
-      required: true,
-      default: false,
     },
   },
   {

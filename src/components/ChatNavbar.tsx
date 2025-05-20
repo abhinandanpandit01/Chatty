@@ -4,7 +4,6 @@ import { IoIosArrowBack } from "react-icons/io";
 import { useSelectedContactStore } from "@/store/UseSelectedContactStore";
 import { useNavigate } from "react-router-dom";
 import { useMessagesStore } from "@/store/ChatsStore";
-
 type ChatNavbarProps = {
   contactInfo: User;
 };
@@ -13,6 +12,7 @@ function ChatNavbar({ contactInfo }: ChatNavbarProps) {
     (state) => state.clearSelectedContact
   );
   const clearMessages = useMessagesStore((state) => state.clearMessages);
+
   const navigate = useNavigate();
   const handleBackToChats = () => {
     clearSelectedContact();
